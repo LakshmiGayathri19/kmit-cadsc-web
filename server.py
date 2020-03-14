@@ -5,6 +5,9 @@ from PIL import Image
 import numpy as np
 import os
 import io
+
+
+#Mammography config
 class Config:
 
 	def __init__(self):
@@ -99,10 +102,11 @@ def allowed_file(filename):
 @app.route('/process-image', methods=['POST'])
 def process_image():
     if request.form['task'] == 'epithelium_segmentation':
-        image = upload_files(['image'])[0]
+        orig, mask = upload_files(['orig', 'mask'])
         lib = getattr(__import__('pipelines.'+request.form['task']), request.form['task'])
-        display_image = lib.get_display_image(image)
-        os.remove(image)
+        display_image = lib.get_display_image(orig, mask)
+        os.remove(orig)
+        os.remove(mask)
     if request.form['task'] == 'mammography':
         image = upload_files(['image'])[0]
         lib = getattr(__import__('pipelines.'+request.form['task']), request.form['task'])
@@ -139,3 +143,4 @@ def upload_files(fnames):
 #JUST DO IT!!!
 if __name__=="__main__":
     app.run(host="0.0.0.0", port="5010",threaded=False)
+
